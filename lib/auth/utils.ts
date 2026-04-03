@@ -2,7 +2,7 @@
 import crypto from 'crypto'
 
 // Nama cookie untuk session
-const SESSION_COOKIE = 'santrikoding_session'
+const SESSION_COOKIE = 'kubagus_session'
 
 /**
  * Generate hash SHA-256 dari input string
