@@ -5,18 +5,27 @@ import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "./generated/prisma/client";
 
 // ensure only a single instance of prisma client is created
-const globalForPrisma = global as unknown as {
-  prisma: PrismaClient;
+const globalForPrisma = globalThis as unknown as {
+  prisma?: PrismaClient;
 };
 
-// initialize prisma adapter
-const adapter = new PrismaMariaDb(process.env.DATABASE_URL as string);
+function createPrismaClient() {
+  const url = process.env.DATABASE_URL;
+  if (!url?.trim()) {
+    throw new Error(
+      "DATABASE_URL is not set. Add it to your .env file (see prisma.config.ts).",
+    );
+  }
 
-// initialize prisma client
-const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
+  const adapter = new PrismaMariaDb(url);
+
+  return new PrismaClient({
     adapter,
   });
+}
 
-export { prisma };
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}
